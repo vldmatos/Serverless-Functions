@@ -12,12 +12,26 @@ namespace Catalog
 {
 	public static class Cars
 	{
-		[FunctionName(nameof(CreateCar))]
-		public static async Task<IActionResult> CreateCar(
-			[HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest request, 
+		[FunctionName(nameof(DeleteCar))]
+		public static IActionResult DeleteCar(
+			[HttpTrigger(AuthorizationLevel.Function, "delete")] HttpRequest request,
 			ILogger logger)
 		{
-			logger.LogInformation($"HTTP trigger function to create a Car. Length: {request.ContentLength}");
+			InformationRequest("HTTP trigger function to delete a Car", request, logger);
+
+			string id = request.Query["id"];
+			if (string.IsNullOrEmpty(id))
+				return new BadRequestObjectResult("Invalid Id received");
+			
+			return new OkObjectResult($"Car Deleted Id {id}!");
+		}
+
+		[FunctionName(nameof(CreateCar))]
+		public static async Task<IActionResult> CreateCar(
+			[HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest request, 
+			ILogger logger)
+		{
+			InformationRequest("HTTP trigger function to create a Car", request, logger);
 
 			string requestBody = await new StreamReader(request.Body).ReadToEndAsync();
 
@@ -30,10 +44,10 @@ namespace Catalog
 
 		[FunctionName(nameof(GetCar))]
 		public static IActionResult GetCar(
-			[HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest request,
+			[HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest request,
 			ILogger logger)
 		{
-			logger.LogInformation($"HTTP trigger function to get a Car. Length: {request.ContentLength}");
+			InformationRequest("HTTP trigger function to get a Car", request, logger);
 
 			string id = request.Query["id"];
 			if (string.IsNullOrEmpty(id))
@@ -53,10 +67,10 @@ namespace Catalog
 
 		[FunctionName(nameof(GetCars))]
 		public static IActionResult GetCars(
-			[HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest request,
+			[HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest request,
 			ILogger logger)
 		{
-			logger.LogInformation($"HTTP trigger function to get all Cars. Length: {request.ContentLength}");
+			InformationRequest("HTTP trigger function to delete all Cars", request, logger);
 
 			var cars = new Car[] 
 			{ 
@@ -81,6 +95,15 @@ namespace Catalog
 			};
 
 			return new OkObjectResult(cars);
+		}
+
+
+		private static void InformationRequest(string message, HttpRequest request, ILogger logger)
+		{
+			logger.LogInformation(@$"{message} 
+									Protocol: {request.Protocol}, 
+									Path: {request.Path}, 
+									Length: {request.ContentLength}");
 		}
 	}
 
