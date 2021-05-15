@@ -42,6 +42,29 @@ namespace Catalog
 			return new OkObjectResult($"Car Saved Id {car.Id}!");
 		}
 
+
+		[FunctionName(nameof(UpdateCar))]
+		public static async Task<IActionResult> UpdateCar(
+			[HttpTrigger(AuthorizationLevel.Function, "put")] HttpRequest request,
+			ILogger logger)
+		{
+			InformationRequest("HTTP trigger function to update a Car", request, logger);
+
+			string id = request.Query["id"];
+			if (string.IsNullOrEmpty(id))
+				return new BadRequestObjectResult("Invalid Id received");
+
+			string requestBody = await new StreamReader(request.Body).ReadToEndAsync();
+
+			var car = JsonConvert.DeserializeObject<Car>(requestBody);
+			if (car is null)
+				return new BadRequestObjectResult("Invalid Car received");
+
+			car.Id = id;
+
+			return new OkObjectResult($"Car Updated Id {car.Id}!");
+		}
+
 		[FunctionName(nameof(GetCar))]
 		public static IActionResult GetCar(
 			[HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest request,
