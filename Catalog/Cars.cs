@@ -27,6 +27,28 @@ namespace Catalog
 
 			return new OkObjectResult($"Car Saved Id {car.Id}!");
 		}
+
+		[FunctionName(nameof(GetCar))]
+		public static IActionResult GetCar(
+			[HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest request,
+			ILogger logger)
+		{
+			logger.LogInformation("HTTP trigger function to get a Car.");
+
+			string id = request.Query["id"];
+			if (string.IsNullOrEmpty(id))
+				return new BadRequestObjectResult("Invalid Id received");
+
+			var car = new Car
+			{
+				Id = id,
+				Plate = "FER-8328",
+				Model = "Fiat Uno",
+				Price = 15000.00M
+			};
+
+			return new OkObjectResult(car);
+		}
 	}
 
 	public class Car
