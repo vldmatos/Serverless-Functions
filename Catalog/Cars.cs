@@ -17,7 +17,7 @@ namespace Catalog
 			[HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest request, 
 			ILogger logger)
 		{
-			logger.LogInformation("HTTP trigger function to create a Car.");
+			logger.LogInformation($"HTTP trigger function to create a Car. Length: {request.ContentLength}");
 
 			string requestBody = await new StreamReader(request.Body).ReadToEndAsync();
 
@@ -33,7 +33,7 @@ namespace Catalog
 			[HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest request,
 			ILogger logger)
 		{
-			logger.LogInformation("HTTP trigger function to get a Car.");
+			logger.LogInformation($"HTTP trigger function to get a Car. Length: {request.ContentLength}");
 
 			string id = request.Query["id"];
 			if (string.IsNullOrEmpty(id))
@@ -48,6 +48,39 @@ namespace Catalog
 			};
 
 			return new OkObjectResult(car);
+		}
+
+
+		[FunctionName(nameof(GetCars))]
+		public static IActionResult GetCars(
+			[HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest request,
+			ILogger logger)
+		{
+			logger.LogInformation($"HTTP trigger function to get all Cars. Length: {request.ContentLength}");
+
+			var cars = new Car[] 
+			{ 
+				new Car
+				{
+					Plate = "HDE-9382",
+					Model = "Celta",
+					Price = 18000.00M
+				},
+				new Car
+				{
+					Plate = "FER-8328",
+					Model = "Fiat Uno",
+					Price = 15000.00M
+				},
+				new Car
+				{
+					Plate = "GBD-2457",
+					Model = "Golf",
+					Price = 65000.00M
+				}
+			};
+
+			return new OkObjectResult(cars);
 		}
 	}
 
