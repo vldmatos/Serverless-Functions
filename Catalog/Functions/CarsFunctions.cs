@@ -1,16 +1,16 @@
+using Catalog.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace Catalog
 {
-	public static class Cars
+	public static class CarsFunctions
 	{
 		[FunctionName(nameof(DeleteCar))]
 		public static IActionResult DeleteCar(
@@ -41,7 +41,6 @@ namespace Catalog
 
 			return new OkObjectResult($"Car Saved Id {car.Id}!");
 		}
-
 
 		[FunctionName(nameof(UpdateCar))]
 		public static async Task<IActionResult> UpdateCar(
@@ -87,7 +86,6 @@ namespace Catalog
 			return new OkObjectResult(car);
 		}
 
-
 		[FunctionName(nameof(GetCars))]
 		public static IActionResult GetCars(
 			[HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest request,
@@ -120,7 +118,6 @@ namespace Catalog
 			return new OkObjectResult(cars);
 		}
 
-
 		private static void InformationRequest(string message, HttpRequest request, ILogger logger)
 		{
 			logger.LogInformation(@$"{message} 
@@ -128,16 +125,5 @@ namespace Catalog
 									Path: {request.Path}, 
 									Length: {request.ContentLength}");
 		}
-	}
-
-	public class Car
-	{
-		public string Id { get; set; } = Guid.NewGuid().ToString();
-
-		public string Plate { get; set; }
-
-		public string Model { get; set; }
-
-		public decimal Price { get; set; }
 	}
 }
