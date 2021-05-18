@@ -12,6 +12,22 @@ namespace Catalog
 {
 	public static class CarsFunctions
 	{
+		private const string connectionString = "mongodb://root:AHSB93993@127.0.0.1:27017";
+		private const string databaseName = "Catalog";
+		private const string collection = "Cars";
+
+		private static CarsService carsService;
+		private static CarsService CarsService
+		{
+			get
+			{
+				if (carsService is null)
+					carsService = new CarsService(connectionString, databaseName, collection);
+				
+				return carsService;
+			}
+		}
+
 		[FunctionName(nameof(DeleteCar))]
 		public static IActionResult DeleteCar(
 			[HttpTrigger(AuthorizationLevel.Function, "delete")] HttpRequest request,
@@ -22,6 +38,8 @@ namespace Catalog
 			string id = request.Query["id"];
 			if (string.IsNullOrEmpty(id))
 				return new BadRequestObjectResult("Invalid Id received");
+
+			CarsService.Remove(id);
 			
 			return new OkObjectResult($"Car Deleted Id {id}!");
 		}
@@ -38,6 +56,8 @@ namespace Catalog
 			var car = JsonConvert.DeserializeObject<Car>(requestBody);
 			if (car is null)
 				return new BadRequestObjectResult("Invalid Car received");
+
+			CarsService.Create(car);
 
 			return new OkObjectResult($"Car Saved Id {car.Id}!");
 		}
@@ -60,6 +80,7 @@ namespace Catalog
 				return new BadRequestObjectResult("Invalid Car received");
 
 			car.Id = id;
+			CarsService.Update(id, car);
 
 			return new OkObjectResult($"Car Updated Id {car.Id}!");
 		}
@@ -75,13 +96,7 @@ namespace Catalog
 			if (string.IsNullOrEmpty(id))
 				return new BadRequestObjectResult("Invalid Id received");
 
-			var car = new Car
-			{
-				Id = id,
-				Plate = "FER-8328",
-				Model = "Fiat Uno",
-				Price = 15000.00M
-			};
+			var car = CarsService.Get(id);
 
 			return new OkObjectResult(car);
 		}
@@ -93,27 +108,7 @@ namespace Catalog
 		{
 			InformationRequest("HTTP trigger function to delete all Cars", request, logger);
 
-			var cars = new Car[] 
-			{ 
-				new Car
-				{
-					Plate = "HDE-9382",
-					Model = "Celta",
-					Price = 18000.00M
-				},
-				new Car
-				{
-					Plate = "FER-8328",
-					Model = "Fiat Uno",
-					Price = 15000.00M
-				},
-				new Car
-				{
-					Plate = "GBD-2457",
-					Model = "Golf",
-					Price = 65000.00M
-				}
-			};
+			var cars = CarsService.GetAll();
 
 			return new OkObjectResult(cars);
 		}

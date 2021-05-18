@@ -1,6 +1,6 @@
 ﻿using Catalog.Models;
-using Catalog.Settings;
 using MongoDB.Driver;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Catalog
@@ -15,19 +15,26 @@ namespace Catalog
 
 		#region Constructors
 
-		public CarsService(IDatabaseSettings settings)
+		public CarsService(string connectionString, string databaseName, string collection)
 		{
-			var client = new MongoClient(settings.ConnectionString);
-			var database = client.GetDatabase(settings.DatabaseName);
+			var client = new MongoClient(connectionString);
+			var database = client.GetDatabase(databaseName);
 
-			Cars = database.GetCollection<Car>(settings.CatalogCollectionName);
+			Cars = database.GetCollection<Car>(collection);
 		}
 
 		#endregion Constructors
 
 		#region Methods
 		
-		public Car Get(string id) => Cars.Find(@event => @event.Id == id).FirstOrDefault();
+		public Car Get(string id) => Cars.Find(find => find.Id == id).FirstOrDefault();
+
+		public IEnumerable<Car> GetAll()
+		{
+			return Cars.Find(find => true)
+					   .Limit(10)
+					   .ToList();
+		}
 
 		public Car Create(Car car)
 		{
